@@ -306,8 +306,10 @@ public class BubbleShowCase: UIView {
 	
 	*/
 	public init(tabBar: UITabBar, index: Int, label: String? = nil) {
-		let tabBarItems = tabBar.subviews.filter { $0.isKind(of: NSClassFromString("UITabBarButton")!) }
-		
+        // MARK: this function is edited by cashbac team to prevent error
+		var tabBarItems = tabBar.subviews.filter { $0.isKind(of: NSClassFromString("UITabBarButton")!) }
+		tabBarItems = tabBarItems.sorted(by: {$0.frame.minX < $1.frame.minX})
+        
 		let maxIndex = tabBarItems.count - 1
 		let index = index < maxIndex ? index : maxIndex
 		let target = tabBarItems[index]
@@ -1004,17 +1006,20 @@ public class BubbleShowCase: UIView {
 			guard let `self` = self else { return }
 			
 			let parent: UIView! = self.target.superview ?? self.target
-			let screenshot: UIView! = parent.resizableSnapshotView(from: self.target.frame, afterScreenUpdates: false, withCapInsets: UIEdgeInsets.zero)
+            // MARK: this function is edited by cashbac team to prevent error
+            if let parent = parent,
+                let screenshot = parent.resizableSnapshotView(from: self.target.frame, afterScreenUpdates: false, withCapInsets: UIEdgeInsets.zero) {
+                screenshot.translatesAutoresizingMaskIntoConstraints = false
+                screenshot.isUserInteractionEnabled = false
+                screenshotShadow.addSubview(screenshot)
+                
+                let centerXImage = screenshot.centerXAnchor.constraint(equalTo: screenshotShadow.centerXAnchor)
+                let centerYImage = screenshot.centerYAnchor.constraint(equalTo: screenshotShadow.centerYAnchor)
+                let widthImage = screenshot.widthAnchor.constraint(equalToConstant: targetFrame.width)
+                let heightImage = screenshot.heightAnchor.constraint(equalToConstant: targetFrame.height)
+                screenshotShadow.addConstraints([centerXImage, centerYImage, heightImage, widthImage])
+            }
 			
-			screenshot.translatesAutoresizingMaskIntoConstraints = false
-			screenshot.isUserInteractionEnabled = false
-			screenshotShadow.addSubview(screenshot)
-			
-			let centerXImage = screenshot.centerXAnchor.constraint(equalTo: screenshotShadow.centerXAnchor)
-			let centerYImage = screenshot.centerYAnchor.constraint(equalTo: screenshotShadow.centerYAnchor)
-			let widthImage = screenshot.widthAnchor.constraint(equalToConstant: targetFrame.width)
-			let heightImage = screenshot.heightAnchor.constraint(equalToConstant: targetFrame.height)
-			screenshotShadow.addConstraints([centerXImage, centerYImage, heightImage, widthImage])
 		}
 	}
 	
